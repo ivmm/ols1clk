@@ -6,6 +6,15 @@
 
 ols1clk 是 OpenLiteSpeed 的一键安装包。使用 ols1clk 可以快速安装 OpenLiteSpeed 以及 PHP、MariaDB 等环境组件，并且还提供了方便 WordPress 安装的相关参数。
 
+**支持安装的系统：**
+
+* RHEL 6/7 （推荐）
+* CloudLinux 6/7 （推荐）
+* CentOS 6/7
+* Debian 8/9
+* Ubuntu 14.04 16.04
+
+
 特性
 --------
 
@@ -23,7 +32,7 @@ ols1clk 是 OpenLiteSpeed 的一键安装包。使用 ols1clk 可以快速安装
 **在 SSH 终端中运行：**
 
 ```bash
-wget https://raw.githubusercontent.com/ivmm/ols1clk/master/ols1clk.sh
+wget https://raw.githubusercontent.com/ivmm/ols1clk/zh-cn/ols1clk.sh
 chmod 755 ols1clk.sh
 
 ./ols1clk.sh [选项1] [选项2] …*
@@ -48,7 +57,7 @@ chmod 755 ols1clk.sh
 **自动安装 OpenLiteSpeed + MariaDB10.1 + PHP7.0 并安装 WP**
 
 ```bash
-./ols1clk.sh --lsphp 71 --mariadbver 10.1
+./ols1clk.sh --lsphp 70 --mariadbver 10.1
 ```
 
 **自动安装 OpenLiteSpeed + MariaDB10.2 + PHP7.1，并安装 WP 指定域名为 www.mf8.biz**
