@@ -1,7 +1,7 @@
 #!/bin/bash
 ##############################################################################
 #    Open LiteSpeed is an open source HTTP server.                           #
-#    Copyright (C) 2013 - 2017 LiteSpeed Technologies, Inc.                  #
+#    Copyright (C) 2013 - 2018 LiteSpeed Technologies, Inc.                  #
 #                                                                            #
 #    This program is free software: you can redistribute it and/or modify    #
 #    it under the terms of the GNU General Public License as published by    #
@@ -978,7 +978,7 @@ function usage
     
     echoG " --uninstall                       " "To uninstall OpenLiteSpeed and remove installation directory."
     echoG " --purgeall                        " "To uninstall OpenLiteSpeed, remove installation directory, and purge all data in mysql."
-    echoG " --quiet                           " "Set to --quiet mode, won't prompt to input anything."
+    echoG " --quiet                           " "Set to quiet mode, won't prompt to input anything."
 
     echoG " --version(-v)                     " "To display version information."
     echoG " --help(-h)                        " "To display usage."
