@@ -8,11 +8,7 @@ ols1clk 是 OpenLiteSpeed 的一键安装包。使用 ols1clk 可以快速安装
 
 **支持安装的系统：**
 
-* RHEL 6/7 （推荐）
-* CloudLinux 6/7 （推荐）
-* CentOS 6/7
-* Debian 8/9
-* Ubuntu 14.04 16.04
+* Oracle 7 
 
 
 特性
@@ -32,7 +28,7 @@ ols1clk 是 OpenLiteSpeed 的一键安装包。使用 ols1clk 可以快速安装
 **在 SSH 终端中运行：**
 
 ```bash
-wget https://raw.githubusercontent.com/ivmm/ols1clk/zh-cn/ols1clk.sh
+wget https://raw.githubusercontent.com/ivmm/ols1clk/oel/ols1clk.sh
 chmod 755 ols1clk.sh
 
 ./ols1clk.sh [选项1] [选项2] …*
