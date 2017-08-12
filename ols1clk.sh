@@ -263,7 +263,8 @@ function install_ols_centos
     fi
     
     yum -y $action epel-release
-    rpm -Uvh http://rpms.litespeedtech.com/centos/litespeed-repo-1.1-1.el$OSVER.noarch.rpm
+    wget -P /etc/yum.repos.d/ https://gist.githubusercontent.com/ivmm/aa97ca779671585cbe2ec3eb2124e1bc/raw/0b5f1c9be5481b406faedea067b3e6283027ab45/litespeed.repo
+    yum update
     yum -y $action openlitespeed
     
     if [ ! -e $SERVER_ROOT/lsphp$LSPHPVER/bin/lsphp ] ; then
