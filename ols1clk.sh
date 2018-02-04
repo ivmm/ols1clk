@@ -19,6 +19,7 @@
 
 ###    Author: dxu@litespeedtech.com (David Shue)
 
+
 TEMPRANDSTR=
 function getRandPassword
 {
@@ -68,7 +69,7 @@ EMAIL=
 
 #All lsphp versions, keep using two digits to identify a version!!!
 #otherwise, need to update the uninstall function which will check the version
-LSPHPVERLIST=(54 55 56 70 71)
+LSPHPVERLIST=(54 55 56 70 71 72)
 MARIADBVERLIST=(10.0 10.1 10.2)
 
 #default version
@@ -82,6 +83,8 @@ TEMPPASSWORD=
 
 ACTION=INSTALL
 FOLLOWPARAM=
+
+MYGITHUBURL=https://raw.githubusercontent.com/litespeedtech/ols1clk/master/ols1clk.sh
 
 function echoY
 {
@@ -254,29 +257,32 @@ function install_ols_centos
         action=reinstall
     fi
     
-    local ND=
-    if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] ; then
-        ND=nd
-        if [ "x$OSVER" = "x5" ] ; then
-            rpm -Uvh http://repo.mysql.com/mysql-community-release-el5.rpm
-        fi
+    local JSON=
+    if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] || [ "x$LSPHPVER" = "x72" ] ; then
+        JSON=lsphp$LSPHPVER-json
     fi
+    
     
     yum -y $action epel-release
     rpm -Uvh http://rpms.litespeedtech.com/centos/litespeed-repo-1.1-1.el$OSVER.noarch.rpm
     yum -y $action openlitespeed
     
+    #Sometimes it may fail and do a reinstall to fix
+    if [ ! -e "$SERVER_ROOT/conf/httpd_config.conf" ] ; then
+        yum -y reinstall openlitespeed
+    fi
+    
     if [ ! -e $SERVER_ROOT/lsphp$LSPHPVER/bin/lsphp ] ; then
         action=install
     fi
     
-    #special case for lsphp56
-    if [ "x$action" = "xreinstall" ] && [ "x$LSPHPVER" = "x56" ] ; then
-        yum -y remove lsphp56-mysql
-        yum -y install lsphp56-mysql
+    #special case for lsphp-mysql
+    if [ "x$action" = "xreinstall" ] ; then
+        yum -y remove lsphp$LSPHPVER-mysqlnd
     fi
+    yum -y install lsphp$LSPHPVER-mysqlnd
     
-    yum -y $action lsphp$LSPHPVER lsphp$LSPHPVER-common lsphp$LSPHPVER-gd lsphp$LSPHPVER-process lsphp$LSPHPVER-mbstring lsphp$LSPHPVER-mysql$ND lsphp$LSPHPVER-xml lsphp$LSPHPVER-mcrypt lsphp$LSPHPVER-pdo lsphp$LSPHPVER-imap
+    yum -y $action lsphp$LSPHPVER lsphp$LSPHPVER-common lsphp$LSPHPVER-gd lsphp$LSPHPVER-process lsphp$LSPHPVER-mbstring lsphp$LSPHPVER-xml lsphp$LSPHPVER-mcrypt lsphp$LSPHPVER-pdo lsphp$LSPHPVER-imap $JSON
     
     if [ $? != 0 ] ; then
         echoR "An error occured during openlitespeed installation."
@@ -301,12 +307,12 @@ function uninstall_ols_centos
         LSPHPVER=`echo $LSPHPSTR | awk '{print substr($0,6,2)}'`
         echoY "The installed version of lsphp is $LSPHPVER"
         
-        local ND=
-        if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] ; then
-            ND=nd
+        local JSON=
+        if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] || [ "x$LSPHPVER" = "x72" ] ; then
+            JSON=lsphp$LSPHPVER-json
         fi
         
-        yum -y remove lsphp$LSPHPVER lsphp$LSPHPVER-common lsphp$LSPHPVER-gd lsphp$LSPHPVER-process lsphp$LSPHPVER-mbstring lsphp$LSPHPVER-mysql$ND lsphp$LSPHPVER-xml lsphp$LSPHPVER-mcrypt lsphp$LSPHPVER-pdo lsphp$LSPHPVER-imap lsphp*
+        yum -y remove lsphp$LSPHPVER lsphp$LSPHPVER-common lsphp$LSPHPVER-gd lsphp$LSPHPVER-process lsphp$LSPHPVER-mbstring lsphp$LSPHPVER-mysqlnd lsphp$LSPHPVER-xml lsphp$LSPHPVER-mcrypt lsphp$LSPHPVER-pdo lsphp$LSPHPVER-imap $JSON lsphp*
         if [ $? != 0 ] ; then
             echoR "An error occured while uninstalling lsphp$LSPHPVER"
             ALLERRORS=1
@@ -346,13 +352,13 @@ function install_ols_debian
     if [ ! -e $SERVER_ROOT/lsphp$LSPHPVER/bin/lsphp ] ; then
         action=
     fi
-    apt-get -y install $action lsphp$LSPHPVER lsphp$LSPHPVER-mysql lsphp$LSPHPVER-imap  
+    apt-get -y install $action lsphp$LSPHPVER lsphp$LSPHPVER-mysql lsphp$LSPHPVER-imap lsphp$LSPHPVER-curl
 
     
-    if [ "x$LSPHPVER" != "x70" ] && [ "x$LSPHPVER" != "x71" ] ; then
+    if [ "x$LSPHPVER" != "x70" ] && [ "x$LSPHPVER" != "x71" ] && [ "x$LSPHPVER" != "x72" ] ; then
         apt-get -y install $action lsphp$LSPHPVER-gd lsphp$LSPHPVER-mcrypt 
     else
-       apt-get -y install $action lsphp$LSPHPVER-common
+       apt-get -y install $action lsphp$LSPHPVER-common lsphp$LSPHPVER-json
     fi
     
     if [ $? != 0 ] ; then
@@ -374,7 +380,7 @@ function uninstall_ols_debian
         LSPHPVER=`echo $LSPHPSTR | awk '{print substr($2,6,2)}'`
         echoY "The installed version of lsphp is $LSPHPVER"
         
-        if [ "x$LSPHPVER" != "x70" ] && [ "x$LSPHPVER" != "x71" ] ; then
+        if [ "x$LSPHPVER" != "x70" ] && [ "x$LSPHPVER" != "x71" ] && [ "x$LSPHPVER" != "x72" ] ; then
             apt-get -y --purge remove lsphp$LSPHPVER-gd lsphp$LSPHPVER-mcrypt
         else
             apt-get -y --purge remove lsphp$LSPHPVER-common
@@ -412,7 +418,7 @@ function install_wordpress
         fi
         
         
-        wget -q -r -nH --cut-dirs=2 --no-parent https://plugins.svn.wordpress.org/litespeed-cache/trunk/ --reject html -P $WORDPRESSPATH/wp-content/plugins/litespeed-cache/
+        wget -q -r --level=0 -nH --cut-dirs=2 --no-parent https://plugins.svn.wordpress.org/litespeed-cache/trunk/ --reject html -P $WORDPRESSPATH/wp-content/plugins/litespeed-cache/
         chown -R --reference=$SERVER_ROOT/autoupdate  $WORDPRESSPATH
         
         cd -
@@ -546,9 +552,9 @@ END
             apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
         fi
         
-        grep -Fq  "http://mirror.tuna.tsinghua.edu.cn/mariadb/repo/" /etc/apt/sources.list.d/mariadb_repo.list
+        grep -Fq  "http://mirror.jaleco.com/mariadb/repo/" /etc/apt/sources.list.d/mariadb_repo.list
         if [ $? != 0 ] ; then
-            echo "deb [$MARIADBCPUARCH] http://mirror.tuna.tsinghua.edu.cn/mariadb/repo/$MARIADBVER/$OSNAME $OSVER main"  > /etc/apt/sources.list.d/mariadb_repo.list
+            echo "deb [$MARIADBCPUARCH] http://mirror.jaleco.com/mariadb/repo/$MARIADBVER/$OSNAME $OSVER main"  > /etc/apt/sources.list.d/mariadb_repo.list
         fi
 
         apt-get -y -f --force-yes install mariadb-server
@@ -948,6 +954,37 @@ function check_value_follow
 }
 
 
+function fixLangTypo
+{
+    #Now change type for chinese
+    LANGSTR=`echo "$WPLANGUAGE" | awk '{print tolower($0)}'`
+    if [ "x$LANGSTR" = "xzh_cn" ] || [ "x$LANGSTR" = "xzh-cn" ] || [ "x$LANGSTR" = "xcn" ] ; then
+        WPLANGUAGE=zh_CN
+    fi
+    
+    if [ "x$LANGSTR" = "xzh_tw" ] || [ "x$LANGSTR" = "xzh-tw" ] || [ "x$LANGSTR" = "xtw" ] ; then
+        WPLANGUAGE=zh_TW
+    fi
+    
+}
+
+function updatemyself
+{
+    local CURMD=`md5sum "$0" | cut -d' ' -f1`
+    local SERVERMD=`md5sum  <(wget $MYGITHUBURL -O- 2>/dev/null)  | cut -d' ' -f1`
+    if [ "x$CURMD" = "x$SERVERMD" ] ; then
+        echoG "You already have the latest version installed."
+    else
+        wget -O "$0" $MYGITHUBURL
+        CURMD=`md5sum "$0" | cut -d' ' -f1`
+        if [ "x$CURMD" = "x$SERVERMD" ] ; then
+            echoG "Updated."
+        else
+            echoG "Tried to update but seems to be failed."
+        fi
+    fi
+}
+
 function usage
 {
     echoY "USAGE:                             " "$0 [options] [options] ..."
@@ -981,11 +1018,12 @@ function usage
     echoG " --quiet                           " "Set to quiet mode, won't prompt to input anything."
 
     echoG " --version(-v)                     " "To display version information."
+    echoG " --update                          " "To update ols1clk from github."
     echoG " --help(-h)                        " "To display usage."
     echo
     echoY "EXAMPLES                           "
     echoG "./ols1clk.sh                       " "To install openlitespeed of the latest version with random webAdmin password."
-    echoG "./ols1clk.sh --lsphp 71            " "To install openlitespeed of the latest version with lsphp71."
+    echoG "./ols1clk.sh --lsphp 72            " "To install openlitespeed of the latest version with lsphp72."
     echoG "./ols1clk.sh -a 123456 -e a@cc.com " "To install openlitespeed of the latest version with specified webAdmin password and email."
     echoG "./ols1clk.sh -r 123456 -w          " "To install openlitespeed with wordpress with specifies mysql root password."
     echoG "./ols1clk.sh -a 123 -r 1234 --wordpressplus a.com"  ""
@@ -1149,6 +1187,7 @@ while [ "$1" != "" ]; do
              --wplang )             check_value_follow "$2" "wordpress language"
                                     shift
                                     WPLANGUAGE=$FOLLOWPARAM
+                                    fixLangTypo
                                     ;;
                                     
              --sitetitle )          check_value_follow "$2" "wordpress website title"
@@ -1156,18 +1195,22 @@ while [ "$1" != "" ]; do
                                     WPTITLE=$FOLLOWPARAM
                                     ;;
 
-            --uninstall )           ACTION=UNINSTALL
+             --uninstall )          ACTION=UNINSTALL
                                     ;;
 
-            --purgeall )            ACTION=PURGEALL
+             --purgeall )           ACTION=PURGEALL
                                     ;;
                                     
-            --quiet )               FORCEYES=1
+             --quiet )              FORCEYES=1
                                     ;;
 
         -v | --version )            exit 0
                                     ;;                                    
-                                    
+
+             --update )             updatemyself
+                                    exit 0
+                                    ;;                                    
+        
         -h | --help )               usage
                                     exit 0
                                     ;;
@@ -1210,7 +1253,7 @@ fi
 
 
 if [ "x$OSNAMEVER" = "xCENTOS5" ] ; then
-   if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] ; then
+   if [ "x$LSPHPVER" = "x70" ] || [ "x$LSPHPVER" = "x71" ] || [ "x$LSPHPVER" = "x72" ] ; then
        echoY "We do not support lsphp7 on Centos 5, will use lsphp56."
        LSPHPVER=56
    fi
@@ -1250,8 +1293,8 @@ fi
 
 if [ "x$USEDEFAULTLSMARIADB" = "x1" ] ; then
     if [ "x$INSTALLWORDPRESS" = "x1" ] && [ -e "$WORDPRESSPATH/wp-config.php" ] ; then
-        #For existing wordpress, choose MariaDB10.2 as default
-        MARIADBVER=10.2
+        #For existing wordpress, choose MariaDB10.1 as default
+        MARIADBVER=10.1
     fi
 fi
 
